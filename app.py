@@ -335,18 +335,21 @@ def main():
         # Churn analysis
         st.subheader("⚠️ Churn Signals")
         
+        # Calculate 90th percentile threshold for churned users
+        churn_threshold_90th = filtered_df['days_since_last_login'].quantile(0.9)
+        
         # Users with increasing time gaps
-        churned_users = filtered_df[filtered_df['days_since_last_login'] > 30]
+        churned_users = filtered_df[filtered_df['days_since_last_login'] > churn_threshold_90th]
         at_risk_users = filtered_df[(filtered_df['days_since_last_login'] > 7) & 
-                                   (filtered_df['days_since_last_login'] <= 30)]
+                                   (filtered_df['days_since_last_login'] <= churn_threshold_90th)]
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Churned Users (>30 days)", len(churned_users))
+            st.metric(f"Churned Users (>{churn_threshold_90th:.0f} days)", len(churned_users))
         
         with col2:
-            st.metric("At Risk Users (7-30 days)", len(at_risk_users))
+            st.metric(f"At Risk Users (7-{churn_threshold_90th:.0f} days)", len(at_risk_users))
         
         with col3:
             churn_rate = len(churned_users) / len(filtered_df) * 100
